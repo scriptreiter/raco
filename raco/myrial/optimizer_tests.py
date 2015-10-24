@@ -8,7 +8,7 @@ from raco.expression import StateVar
 
 from raco.language.myrialang import (
     MyriaShuffleConsumer, MyriaShuffleProducer, MyriaHyperShuffleProducer,
-    MyriaBroadcastConsumer, MyriaQueryScan, MyriaSplitConsumer)
+    MyriaBroadcastConsumer, MyriaQueryScan, MyriaSplitConsumer, MyriaUnionAll)
 from raco.language.myrialang import (MyriaLeftDeepTreeAlgebra,
                                      MyriaHyperCubeAlgebra)
 from raco.compile import optimize
@@ -1003,3 +1003,17 @@ class OptimizerTest(myrial_test.MyrialTestCase):
         # (in general, info could be h($0) && h($2)
         self.assertEquals(pp.partitioning().hash_partitioned,
                           frozenset([AttIndex(0)]))
+
+    def test_flatten_unionall(self):
+        """Test flattening a chain of UnionAlls"""
+        query = """
+        X = scan({x});
+        a = (select $0 from X) + [from X emit $0] + [from X emit $1];
+        store(a, a);
+        """.format(x=self.x_key)
+        lp = self.get_logical_plan(query)
+        # should be UNIONAll([UNIONAll([expr_1, expr_2]), expr_3])
+        self.assertEquals(self.get_count(lp, UnionAll), 2)
+        pp = self.logical_to_physical(lp)
+        # should be UNIONALL([expr_1, expr_2, expr_3])
+        self.assertEquals(self.get_count(pp, MyriaUnionAll), 1)

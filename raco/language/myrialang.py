@@ -1806,6 +1806,26 @@ class MyriaAlgebra(Algebra):
     )
 
 
+class FlattenUnionAll(rules.Rule):
+
+    @staticmethod
+    def collect_children(op):
+        if isinstance(op, algebra.UnionAll):
+            children = []
+            for child in op.args:
+                children += FlattenUnionAll.collect_children(child)
+            return children
+        return [op]
+
+    def fire(self, op):
+        if not isinstance(op, algebra.UnionAll):
+            return op
+        children = FlattenUnionAll.collect_children(op)
+        if len(children) == 1:
+            return children[0]
+        return algebra.UnionAll(children)
+
+
 class MyriaLeftDeepTreeAlgebra(MyriaAlgebra):
 
     """Myria physical algebra using left deep tree pipeline and 1-D shuffle"""
@@ -1827,6 +1847,7 @@ class MyriaLeftDeepTreeAlgebra(MyriaAlgebra):
             distributed_group_by,
             [rules.PushApply()],
             [LogicalSampleToDistributedSample()],
+            [FlattenUnionAll()],
         ]
 
         if kwargs.get('push_sql', False):
