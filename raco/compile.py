@@ -44,9 +44,9 @@ def optimize_by_rules(expr, rules):
             newe = rule(e)
             writer.write_if_enabled(newe, str(rule))
 
-            # LOG.debug("apply rule %s\n" +
-            #           colored("  -", "red") + " %s" + "\n" +
-            #           colored("  +", "green") + " %s", rule, e, newe)
+            LOG.debug("apply rule %s\n" +
+                      colored("  -", "red") + " %s" + "\n" +
+                      colored("  +", "green") + " %s", rule, e, newe)
             newe.apply(recursiverule)
 
             return newe
