@@ -16,7 +16,7 @@ comprehension_keywords = ['SELECT', 'AS', 'EMIT', 'FROM', 'WHERE']
 word_operators = ['AND', 'OR', 'NOT']
 
 builtins = ['EMPTY', 'WORKER_ID', 'SCAN', 'COUNTALL', 'COUNT', 'STORE',
-            'DIFF', 'CROSS', 'JOIN', 'UNIONALL', 'INTERSECT', 'DISTINCT',
+            'DIFF', 'CROSS', 'JOIN', 'UNION', 'INTERSECT', 'DISTINCT',
             'LIMIT', 'SINK', 'SAMPLESCAN']
 
 

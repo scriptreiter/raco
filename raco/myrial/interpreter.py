@@ -250,11 +250,17 @@ class ExpressionProcessor(object):
         op = self.evaluate(expr)
         return raco.algebra.Distinct(input=op)
 
+    def union(self, e1, e2):
+        left = self.evaluate(e1)
+        right = self.evaluate(e2)
+        check_binop_compatability("union", left, right)
+        return raco.algebra.Union(left, right)
+
     def unionall(self, e1, e2):
         left = self.evaluate(e1)
         right = self.evaluate(e2)
         check_binop_compatability("unionall", left, right)
-        return raco.algebra.UnionAll(left, right)
+        return raco.algebra.UnionAll([left, right])
 
     def countall(self, expr):
         op = self.evaluate(expr)

@@ -363,7 +363,7 @@ class CBaseSelect(Pipelined, algebra.Select):
         return code
 
 
-class CBaseUnionAll(Pipelined, algebra.Union):
+class CBaseUnion(Pipelined, algebra.Union):
 
     def produce(self, state):
         self.unifiedTupleType = self.new_tuple_ref(gensym(), self.scheme())
@@ -374,6 +374,36 @@ class CBaseUnionAll(Pipelined, algebra.Union):
 
     def consume(self, t, src, state):
         union_template = _cgenv.get_template('union.cpp')
+
+        unified_tuple_typename = self.unifiedTupleType.getTupleTypename()
+        unified_tuple_name = self.unifiedTupleType.name
+        src_tuple_name = t.name
+
+        # add declaration for function to convert from one type to the other
+        type1 = t.getTupleTypename()
+        type1numfields = len(t.scheme)
+        convert_func_name = "create_" + gensym()
+        result_type = unified_tuple_typename
+        convert_func = _cgenv.get_template(
+            'materialized_tuple_create_one.cpp').render(locals())
+        state.addDeclarations([convert_func])
+
+        inner_plan_compiled = \
+            self.parent().consume(self.unifiedTupleType, self, state)
+        return union_template.render(locals())
+
+
+class CBaseUnionAll(Pipelined, algebra.UnionAll):
+
+    def produce(self, state):
+        self.unifiedTupleType = self.new_tuple_ref(gensym(), self.scheme())
+        state.addDeclarations([self.unifiedTupleType.generateDefinition()])
+
+        for arg in self.args:
+            arg.produce(state)
+
+    def consume(self, t, src, state):
+        union_template = _cgenv.get_template('unionall.cpp')
 
         unified_tuple_typename = self.unifiedTupleType.getTupleTypename()
         unified_tuple_name = self.unifiedTupleType.name

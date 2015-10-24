@@ -209,10 +209,10 @@ class MyriaLimit(algebra.Limit, MyriaOperator):
 
 class MyriaUnionAll(algebra.UnionAll, MyriaOperator):
 
-    def compileme(self, leftid, rightid):
+    def compileme(self, *args):
         return {
             "opType": "UnionAll",
-            "argChildren": [leftid, rightid]
+            "argChildren": args
         }
 
 
@@ -1560,8 +1560,18 @@ class AddAppendTemp(rules.Rule):
         if not isinstance(child, MyriaUnionAll):
             return op
 
-        left = child.left
-        right = child.right
+        # TODO: handle multiple children.
+        # A UnionAll for children that are not scan?
+        if len(child.args) != 2:
+            return op
+
+        rel_name = op.name
+        is_scan = lambda op: isinstance(
+            op,
+            MyriaScanTemp) and op.name == rel_name
+
+        left = child.args[0]
+        right = child.args[1]
         rel_name = op.name
 
         is_scan = lambda op: isinstance(

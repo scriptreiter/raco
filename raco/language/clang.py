@@ -431,6 +431,10 @@ def indentby(code, level):
 
 # iteration  over table + insertion into hash table with filter
 
+class CUnion(clangcommon.CBaseUnion, CCOperator):
+    pass
+
+
 class CUnionAll(clangcommon.CBaseUnionAll, CCOperator):
     pass
 
@@ -544,7 +548,7 @@ def clangify(emit_print):
         rules.OneToOne(algebra.Project, CProject),
         rules.OneToOne(algebra.UnionAll, CUnionAll),
         # TODO: obviously breaks semantics
-        rules.OneToOne(algebra.Union, CUnionAll),
+        rules.OneToOne(algebra.Union, CUnion),
         clangcommon.StoreToBaseCStore(emit_print, CStore),
 
         clangcommon.BreakHashJoinConjunction(CSelect, CHashJoin)

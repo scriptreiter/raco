@@ -168,7 +168,7 @@ class CFGTest(myrial_test.MyrialTestCase):
         query = """
         A = SCAN(public:adhoc:points);
         B = SCAN(public:adhoc:points);
-        C = UNIONALL(A, B);
+        C = A + B;
         D = DISTINCT(C);
         E = SCAN(public:adhoc:points);
         F = DIFF(E, D);

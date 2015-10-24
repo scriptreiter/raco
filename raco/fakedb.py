@@ -269,12 +269,12 @@ class FakeDatabase(Catalog):
         return iter([])
 
     def unionall(self, op):
-        left_it = self.evaluate(op.left)
-        right_it = self.evaluate(op.right)
-        return itertools.chain(left_it, right_it)
+        return itertools.chain.from_iterable(
+            self.evaluate(arg) for arg in op.args)
 
     def union(self, op):
-        return set(x for x in self.unionall(op))
+        return set(x for x in itertools.chain(
+            self.evaluate(op.left), self.evaluate(op.right)))
 
     def difference(self, op):
         its = [self.evaluate(op.left), self.evaluate(op.right)]

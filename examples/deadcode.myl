@@ -5,9 +5,9 @@ Z = SCAN(public:adhoc:points);
 
 X = [FROM X,Y WHERE X.y == Y.y EMIT X.id, Y.x, X.y];
 X = DISTINCT(X);
-X = UNIONALL(X, Y);
+X = X + Y;
 -- End dead code block
 
 X = SCAN(public:adhoc:points);
-Q = UNIONALL(X, Z);
+Q = X + Z;
 STORE(Q, OUTPUT);

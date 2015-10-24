@@ -1049,6 +1049,11 @@ class GrappaUnionAll(clangcommon.CBaseUnionAll, GrappaOperator):
     pass
 
 
+# Basic duplication eliminated set union like serial C++
+class GrappaUnion(clangcommon.CBaseUnion, GrappaOperator):
+    pass
+
+
 # Basic materialized copy based project like serial C++
 class GrappaProject(clangcommon.CBaseProject, GrappaOperator):
     pass
@@ -1157,7 +1162,7 @@ def grappify(join_type, emit_print,
         rules.OneToOne(algebra.Project, GrappaProject),
         rules.OneToOne(algebra.UnionAll, GrappaUnionAll),
         # TODO: obviously breaks semantics
-        rules.OneToOne(algebra.Union, GrappaUnionAll),
+        rules.OneToOne(algebra.Union, GrappaUnion),
         clangcommon.StoreToBaseCStore(emit_print, GrappaStore),
 
         # Don't need this because we support two-key

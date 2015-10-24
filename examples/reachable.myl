@@ -8,7 +8,7 @@ DO
                               WHERE Delta.addr == Edge.src
                               EMIT Edge.dst AS addr]);
     Delta = DIFF(NewlyReachable, Reachable);
-    Reachable = UNIONALL(Delta, Reachable);
+    Reachable = Delta + Reachable;
 WHILE [FROM COUNTALL(Delta) AS size EMIT *size > 0];
 
 STORE(Reachable, OUTPUT);

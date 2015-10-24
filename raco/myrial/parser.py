@@ -797,7 +797,7 @@ class Parser(object):
     def p_setop(p):
         """setop : INTERSECT
                  | DIFF
-                 | UNIONALL"""
+                 | UNION"""
         p[0] = p[1]
 
     @staticmethod
