@@ -1,7 +1,5 @@
 import abc
 import itertools
-import re
-import os.path
 import jinja2
 
 from raco import algebra
@@ -9,13 +7,16 @@ from raco import expression
 from raco import catalog
 from raco.algebra import gensym
 from raco.expression import UnnamedAttributeRef
-from raco.language import Language
+from raco.backends import Language
 from raco.pipelines import Pipelined
 from raco import types
 
 import logging
 from functools import reduce
 _LOG = logging.getLogger(__name__)
+
+
+_PACKAGE_PATH = 'raco.backends'
 
 
 def prepend_loader(env, loader):
@@ -26,7 +27,7 @@ def prepend_loader(env, loader):
 
 
 def prepend_template_relpath(env, relpath):
-    return prepend_loader(env, jinja2.PackageLoader('raco.language', relpath))
+    return prepend_loader(env, jinja2.PackageLoader(_PACKAGE_PATH, relpath))
 
 
 class CBaseLanguage(Language):
@@ -52,9 +53,9 @@ class CBaseLanguage(Language):
         @return: a jinja2.Environment
         """
         child_loaders = [
-            jinja2.PackageLoader('raco.language', l) for l in libraries]
+            jinja2.PackageLoader(_PACKAGE_PATH, l) for l in libraries]
         loaders = child_loaders + \
-            [jinja2.PackageLoader('raco.language', 'cbase_templates')]
+            [jinja2.PackageLoader(_PACKAGE_PATH, 'cpp/cbase_templates')]
 
         # StrictUndefined makes uses of the result of render() fail when
         # a template variable is undefined, which is most useful for debugging
@@ -366,31 +367,10 @@ class CBaseSelect(Pipelined, algebra.Select):
 class CBaseUnion(Pipelined, algebra.Union):
 
     def produce(self, state):
-        self.unifiedTupleType = self.new_tuple_ref(gensym(), self.scheme())
-        state.addDeclarations([self.unifiedTupleType.generateDefinition()])
-
-        self.right.produce(state)
-        self.left.produce(state)
+        raise NotImplementedError
 
     def consume(self, t, src, state):
-        union_template = _cgenv.get_template('union.cpp')
-
-        unified_tuple_typename = self.unifiedTupleType.getTupleTypename()
-        unified_tuple_name = self.unifiedTupleType.name
-        src_tuple_name = t.name
-
-        # add declaration for function to convert from one type to the other
-        type1 = t.getTupleTypename()
-        type1numfields = len(t.scheme)
-        convert_func_name = "create_" + gensym()
-        result_type = unified_tuple_typename
-        convert_func = _cgenv.get_template(
-            'materialized_tuple_create_one.cpp').render(locals())
-        state.addDeclarations([convert_func])
-
-        inner_plan_compiled = \
-            self.parent().consume(self.unifiedTupleType, self, state)
-        return union_template.render(locals())
+        raise NotImplementedError
 
 
 class CBaseUnionAll(Pipelined, algebra.UnionAll):
