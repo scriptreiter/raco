@@ -413,11 +413,14 @@ class StatementProcessor(object):
         first_op_id = self.cfg.next_op_id  # op ID of the top of the loop
 
         for _type, _id, expr in statement_list:
-            if _type != 'ASSIGN':
+            if _type == 'ASSIGN':
                 # TODO: Better error message
+                self.__do_assignment(_id, expr)
+            elif _type == 'DOWHILE':
+                self.dowhile(_id, expr)
+            else:
                 raise InvalidStatementException('%s not allowed in do/while' %
                                                 _type.lower())
-            self.__do_assignment(_id, expr)
 
         last_op_id = self.cfg.next_op_id
 

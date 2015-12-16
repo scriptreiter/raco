@@ -118,7 +118,11 @@ class ControlFlowGraph(object):
                 def_var = self.graph.node[i]['def_var']
                 def_set = set()
                 if def_var is not None:
-                    def_set.add(def_var)
+                    if isinstance(def_var, list):
+                        for new_var in def_var:
+                            def_set.add(new_var)
+                    else:
+                        def_set.add(def_var)
                 live_in[i].update(live_out_prev[i] - def_set)
 
                 # variables that are live-in at a successor are live-out
@@ -254,7 +258,17 @@ class ControlFlowGraph(object):
 
                 # Only delete nodes that 1) Define a variable (and therefore
                 # aren't STORE, etc.); 2) Are not required downstream.
-                if def_var and def_var not in out_set:
+                if def_var and isinstance(def_var, list):
+                    should_delete = True
+                    for new_var in def_var:
+                        if new_var in out_set:
+                            should_delete = False
+                            break
+                    if should_delete:
+                        self.__delete_node(node)
+                        _continue = True
+                        break
+                elif def_var and def_var not in out_set:
                     self.__delete_node(node)
                     _continue = True
                     break
@@ -289,7 +303,10 @@ class ControlFlowGraph(object):
                 def_set_stack.append(set())
                 # Add anything defined by the current statement to the def_set
                 def_var = self.graph.node[i]['def_var']
-                if def_var:
+                if def_var and isinstance(def_var, list):
+                    for new_var in def_var:
+                        def_set_stack[-1].add(new_var)
+                elif def_var:
                     def_set_stack[-1].add(def_var)
             elif (current_def_set() is not None and
                     (self.graph.out_degree(i) == 2 or i == last_op)):
@@ -303,12 +320,18 @@ class ControlFlowGraph(object):
                 if next_op is None:
                     # no next node?  Loop is obviously dead
                     loops_to_delete.append(loop_range)
+                    current_loop_first_index = i + 1
                 elif len(def_set.intersection(live_in[next_op])) == 0:
                     loops_to_delete.append(loop_range)
+                    current_loop_first_index = i + 1
+
             elif current_def_set() is not None:
                 # Add anything defined by the current statement to the def_set
                 def_var = self.graph.node[i]['def_var']
-                if def_var:
+                if def_var and isinstance(def_var, list):
+                    for new_var in def_var:
+                        def_set_stack[-1].add(new_var)
+                elif def_var:
                     def_set_stack[-1].add(def_var)
 
         if not loops_to_delete:
