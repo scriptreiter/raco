@@ -282,6 +282,9 @@ class ExpressionProcessor(object):
         op = self.evaluate(expr)
         return raco.algebra.Limit(input=op, count=count)
 
+    def seq(self, count):
+        return raco.algebra.Seq(count=count)
+
     def cross(self, left_target, right_target):
         left = self.evaluate(left_target)
         right = self.evaluate(right_target)

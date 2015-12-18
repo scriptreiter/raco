@@ -438,7 +438,6 @@ class UnionAll(IdenticalSchemeBinaryOperator):
     def shortStr(self):
         return self.opname()
 
-
 class Intersection(IdenticalSchemeBinaryOperator):
 
     """Set intersection."""
@@ -790,6 +789,36 @@ class Distinct(UnaryOperator):
     def shortStr(self):
         return self.opname()
 
+
+class Seq(ZeroaryOperator):
+
+    """Sequence generator."""
+
+    def __init__(self, count=None):
+        ZeroaryOperator.__init__(self)
+        self.count = count
+
+    def __eq__(self, other):
+        return ZeroaryOperator.__eq__(self, other) and self.count == other.count
+
+    def num_tuples(self):
+        return self.count
+
+    def partitioning(self):
+        return RepresentationProperties()
+
+    def scheme(self):
+        return scheme.Scheme([("SEQNUM", "LONG_TYPE")])
+
+    def shortStr(self):
+        return "%s(%s)" % (self.opname(), self.count)
+
+    def copy(self, other):
+        self.count = other.count
+        ZeroaryOperator.copy(self, other)
+
+    def __repr__(self):
+        return "{op}({cnt!r})".format(op=self.opname(),cnt=self.count)
 
 class Limit(UnaryOperator):
 

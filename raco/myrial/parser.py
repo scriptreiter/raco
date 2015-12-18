@@ -790,6 +790,11 @@ class Parser(object):
         p[0] = ('COUNTALL', p[3])
 
     @staticmethod
+    def p_expression_seq(p):
+        'expression : SEQ LPAREN INTEGER_LITERAL RPAREN'
+        p[0] = ('SEQ', p[3])
+
+    @staticmethod
     def p_expression_binary_set_operation(p):
         'expression : setop LPAREN expression COMMA expression RPAREN'
         p[0] = (p[1], p[3], p[5])
@@ -1077,6 +1082,11 @@ class Parser(object):
         """count_arg : TIMES
                      | sexpr"""
         p[0] = p[1]
+
+    @staticmethod
+    def p_sexpr_seq(p):
+        'sexpr : SEQ LPAREN count_arg RPAREN'
+        p[0] = sexpr.SEQ(p[3])
 
     @staticmethod
     def p_sexpr_unbox(p):

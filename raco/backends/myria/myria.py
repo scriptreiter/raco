@@ -205,6 +205,13 @@ class MyriaLimit(algebra.Limit, MyriaOperator):
             "numTuples": self.count,
         }
 
+class MyriaSeq(algebra.Seq, MyriaOperator):
+
+    def compileme(self):
+        return {
+            "opType": "Seq",
+            "count": self.count,
+        }
 
 class MyriaUnionAll(algebra.UnionAll, MyriaOperator):
 
@@ -1642,6 +1649,7 @@ myriafy = [
     rules.OneToOne(algebra.Apply, MyriaApply),
     rules.OneToOne(algebra.Select, MyriaSelect),
     rules.OneToOne(algebra.Distinct, MyriaDupElim),
+    rules.OneToOne(algebra.Seq, MyriaSeq),
     rules.OneToOne(algebra.Shuffle, MyriaShuffle),
     rules.OneToOne(algebra.HyperCubeShuffle, MyriaHyperShuffle),
     rules.OneToOne(algebra.Collect, MyriaCollect),
